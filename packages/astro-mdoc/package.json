@@ -1,0 +1,41 @@
+{
+  "name": "astro-mdoc",
+  "type": "module",
+  "version": "0.0.2",
+  "keywords": [
+    "astro-markdoc-ssr",
+    "astro-mdoc-ssr",
+    "astro-mdoc",
+    "astro-markdoc",
+    "markdoc",
+    "mdoc",
+    "astro",
+    "withastro",
+    "astro-integration"
+  ],
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.7.0",
+    "@astrojs/react": "^3.6.0",
+    "@markdoc/markdoc": "^0.4.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "astro": "^4.11.3",
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^14.1.0",
+    "nanoid": "^5.0.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.5.2"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.1",
+    "@types/node": "^20.14.9"
+  }
+}
