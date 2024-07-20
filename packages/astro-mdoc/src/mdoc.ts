@@ -66,7 +66,7 @@ export const defaultMdocPath = ({ path = mdocPathDefault }: { path?: MdocConfigP
 export const mdocConfigDefault: Required<MdocConfig> = {
     nodes: mdocConfigFile('nodes'),
     functions: mdocConfigFile('functions'),
-    partials: mdocConfigFile('partials'),
+    partials: `/src/markdoc/partials/`,
     tags: mdocConfigFile('tags'),
     variables: mdocConfigFile('variables'),
     validations: mdocConfigFile('validations'),
@@ -79,8 +79,8 @@ export const mdocPathDefault: MdocConfigPath = {
 
 function mdocConfigFile(filename: string, prefix?: FSPath): FSPath {
     if(prefix) {
-        return `${prefix}/${filename}/index.ts`
+        return `${prefix}/${filename}/index`
     }
 
-    return `/src/markdoc/${filename}/index.ts`
+    return `/src/markdoc/${filename}/index`
 }

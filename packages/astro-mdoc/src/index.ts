@@ -6,9 +6,7 @@ import { ConfigFromURL, mergeConfig } from "./config";
 import { viteAstroMdocPlugin } from "./runtime";
 import * as fs from 'node:fs';
 
-export const SUPPORTED_MARKDOC_CONFIG_REGEX = /\.(js|ts|jsx|tsx|mjs|mts|ejs|ets)$/;
-
-export const SUPPORTED_MARKDOC_SRC_REGEX = /\.(md|mdoc|js|ts|jsx|tsx|mjs|mts|ejs|ets)$/;
+export const SUPPORTED_MARKDOC_SRC_REGEX = /\.(md|mdoc|js|ts|jsx|tsx|mjs|mts|ejs|ets|markdoc.ts)$/;
 
 export const SUPPORTED_MARKDOC_PARTIALS = /\.(md|mdoc)$/;
 
@@ -40,7 +38,7 @@ export async function loadMdocConfig(
 
     const partialURL = new URL(configPath.partials as string, root);
     if(fs.existsSync(partialURL)) {
-        partials = await ConfigFromURL(partialURL, options!!);
+        partials = await ConfigFromURL(partialURL, options);
     }
 
     return mergeConfigs(nodes, tags, variables, functions, partials);
@@ -80,7 +78,7 @@ const AstroMdocSSR = ({ options = {
                         plugins: [mdocConfig]
                     }
                 })
-            }
+            },
         }
     } satisfies AstroIntegration;
 }

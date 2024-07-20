@@ -2,16 +2,17 @@
 //! astro-head-inject
 import type { MarkdocIntegrationOptions } from "../options";
 import Renderer from "./Renderer.astro";
-import AstroMdocConfig from 'virtual:wygin/mdoc-config';
+import config from 'virtual:wygin/mdoc-config';
+import IntegrationOpts from 'virtual:wygin/options';
 
 type Props = {
 	body: string;
-	options: MarkdocIntegrationOptions | undefined
+	options?: MarkdocIntegrationOptions | undefined
 };
 
-const { body, options } = Astro.props as Props
+const { body, options = IntegrationOpts } = Astro.props as Props
 ---
 
-<Renderer config={AstroMdocConfig as any} body=`${body}` options={options}>
-    <slot></slot>
+<Renderer config={config} body=`${body}` options={options}>
+    <slot />
 </Renderer>

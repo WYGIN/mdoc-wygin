@@ -18,10 +18,12 @@ export async function viteAstroMdocPlugin({ root }: Pick<AstroConfig, 'root'>, o
     )
     const modules = {
         'virtual:wygin/acf-components': acfComponents,
-        'virtual:wygin/mdoc-config': `import { loadMdocConfig } from 'astro-mdoc/src/index.js';
+        'virtual:wygin/mdoc-config': `import { loadMdocConfig } from 'astro-mdoc';
         const config = await loadMdocConfig({ root: new URL(${JSON.stringify(root)}) }, ${JSON.stringify(options!!)});
-        // export default config;
+        console.log(config);
+        export default config;
         `,
+        'virtual:wygin/options': `export default ${JSON.stringify(options)}`
     } satisfies Record<string, string>;
 
     /** Mapping names prefixed with `\0` to their original form. */

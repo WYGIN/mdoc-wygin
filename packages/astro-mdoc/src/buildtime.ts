@@ -29,13 +29,11 @@ export const ACFComponents = async (nodes: URL, tags: URL): Promise<string> => {
     let nodeImports: any = {}, tagImports: any = {};
     let namedNodeImports: string[] = [], namedTagImports: string[] = []
     if(fs.existsSync(nodes)) {
-        /* @vite-ignore */
-        nodeImports = await import(nodes.pathname);
+        nodeImports = await import(/* @vite-ignore */nodes.pathname);
     }
 
     if(fs.existsSync(tags)) {
-        /* @vite-ignore */
-        tagImports = await import(tags.pathname);
+        tagImports = await import(/* @vite-ignore */tags.pathname);
     }
 
     namedNodeImports = getNamedImport(nodeImports);

@@ -60,11 +60,10 @@ export const ConfigFromURL = async (url: URL, configType: ConfigType): Promise<C
     let config: Config = {};
     switch(configType) {
         case 'node':
-            /* @vite-ignore */
-            const nodeImports = await import(url.pathname);
+            const nodeImports = await import(/* @vite-ignore */url.pathname);
             const namedNodeImports = getNamedImport(nodeImports);
             for(const key of namedNodeImports) {
-                Object.assign(config, MdocConfig({
+                config = Object.assign(config, MdocConfig({
                     nodes: {
                         ...nodeImports[key],
                     }
@@ -72,38 +71,38 @@ export const ConfigFromURL = async (url: URL, configType: ConfigType): Promise<C
             }
             break;
         case 'tag':
-            /* @vite-ignore */
-            const tagImports = await import(url.pathname);
+            const tagImports = await import(/* @vite-ignore */url.pathname);
             const namedTagImports = getNamedImport(tagImports);
             for(const key of namedTagImports) {
-                Object.assign(config, MdocConfig({
+                config = Object.assign(config, MdocConfig({
                     tags: {
                         ...tagImports[key],
                     }
                 } satisfies AstroMdocConfig))
             }
+            break;
         case 'function':
-            /* @vite-ignore */
-            const funcImports = await import(url.pathname);
+            const funcImports = await import(/* @vite-ignore */url.pathname);
             const namedFuncImports = getNamedImport(funcImports);
             for(const key of namedFuncImports) {
-                Object.assign(config, {
+                config = Object.assign(config, {
                     functions: {
                         ...funcImports[key],
                     },
                 } satisfies Config)
             }
+            break;
         case 'variable':
-            /* @vite-ignore */
-            const varImports = await import(url.pathname);
+            const varImports = await import(/* @vite-ignore */url.pathname);
             const namedVarImports = getNamedImport(varImports);
             for(const key of namedVarImports) {
-                Object.assign(config, {
+                config = Object.assign(config, {
                     variables: {
                         ...varImports[key],
                     }
                 } satisfies Config)
             }
+            break;
         default:
             const partials = getFilesWithExtentions(url, SUPPORTED_MARKDOC_PARTIALS);
             const options = configType as MarkdocIntegrationOptions;
@@ -117,7 +116,7 @@ export const ConfigFromURL = async (url: URL, configType: ConfigType): Promise<C
                 const tokens = tokenizer.tokenize(content);
                 const node = Markdoc.parse(tokens);
 
-                Object.assign(config, {
+                config = Object.assign(config, {
                     partials: {
                         [partialFileName[partialFileName.length - 1]]: node,
                     }

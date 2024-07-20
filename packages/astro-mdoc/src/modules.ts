@@ -1,2 +1,9 @@
-export * as AcfComponents from "virtual:wygin/acf-components";
-export * as Config from "virtual:wygin/mdoc-config";
+import AcfComponents from "virtual:wygin/acf-components";
+import Config from "virtual:wygin/mdoc-config";
+import Options from 'virtual:wygin/options';
+
+export {
+    Config,
+    Options,
+    AcfComponents,
+}
