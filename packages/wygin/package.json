@@ -10,8 +10,20 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.11.5",
     "@astrojs/check": "^0.8.1",
+    "@astrojs/react": "^3.6.0",
+    "@markdoc/markdoc": "^0.4.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "astro": "^4.11.5",
+    "astro-mdoc": "link:../astro-mdoc",
+    "copy-to-clipboard": "^3.3.3",
+    "prismjs": "^1.29.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "^5.5.3"
+  },
+  "devDependencies": {
+    "@types/prismjs": "^1.26.4"
   }
 }

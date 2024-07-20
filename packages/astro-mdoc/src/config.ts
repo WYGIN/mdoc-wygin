@@ -1,106 +1,176 @@
-import type {
-	Config,
-	ConfigType as MarkdocConfig,
-	MaybePromise,
-	NodeType,
-	Schema,
-} from '@markdoc/markdoc';
-import _Markdoc from '@markdoc/markdoc';
-import type { AstroInstance } from 'astro';
-import { componentConfigSymbol } from './utils';
+import type { AstroComponentFactory } from "astro/runtime/server/index.js";
+import type { NodeType, Schema, Config, ConfigFunction, ValidationError, Node } from "@markdoc/markdoc";
+import Markdoc from '@markdoc/markdoc';
+import Func from "@markdoc/markdoc/src/ast/function";
+import { getNamedImport } from "./imports";
+import { MdocConfig } from "./buildtime";
+import * as fs from 'node:fs';
+import { SUPPORTED_MARKDOC_PARTIALS } from ".";
+import type { MarkdocIntegrationOptions } from "./options";
 
-export type Render = ComponentConfig | AstroInstance['default'] | string;
-export type ComponentConfig = {
-	type: 'package' | 'local';
-	path: string;
-	namedExport?: string;
-	[componentConfigSymbol]: true;
-};
+export interface IMarkdocConfig {}
 
-export type AstroMarkdocConfig<C extends Record<string, any> = Record<string, any>> = Omit<
-	MarkdocConfig,
-	'tags' | 'nodes'
-> &
-	Partial<{
-		tags: Record<string, Schema<Config, Render>>;
-		nodes: Partial<Record<NodeType, Schema<Config, Render>>>;
-		ctx: C;
-		extends: MaybePromise<ResolvedAstroMarkdocConfig>[];
-	}>;
-
-export type ResolvedAstroMarkdocConfig = Omit<AstroMarkdocConfig, 'extends'>;
-
-export const Markdoc = _Markdoc;
-
-export function defineMarkdocConfig(config: AstroMarkdocConfig): AstroMarkdocConfig {
-	return config;
+export interface IMarkdocNodeConfig extends IMarkdocConfig {
+    node(): Config['nodes'];
+    component(): AstroComponentFactory;
 }
 
-export type FSPath = `/${string}`;
-
-const __MarkdocPathSymbol = Symbol.for('@wygininc/types:MarkdocPath');
-
-export type MarkdocPath = MarkdocPathObj | FSPath;
-
-export type MarkdocPathObj = {
-    readonly [__MarkdocPathSymbol]: true,
-    base?: FSPath,
-    nodes?: FSPath,
-    tags?: FSPath,
-    variables?: FSPath,
-    functions?: FSPath,
-    partials?: FSPath,
+export interface IMarkdocTagConfig extends IMarkdocConfig {
+    tag(tag: AstroMdocConfig['tags']): Config['tags'];
+    component(node: AstroMdocConfig['tags']): AstroComponentFactory;
 }
 
-export const getMarkdocPath = (path?: MarkdocPath): MarkdocPathObj => {
-    let nodes, tags, variables, functions, partials: string;
-    if(path && isMarkdocPathObj(path)) {
-        if(path.base) {
-            nodes = `${path.base}${path.nodes}/index.ts` as FSPath;
-            tags = `${path.base}${path.tags}/index.ts` as FSPath;
-            variables = `${path.base}${path.variables}/index.ts` as FSPath;
-            functions = `${path.base}${path.functions}/index.ts` as FSPath;
-            partials = `${path.base}${path.partials}/`;
-            return { 
-                nodes, 
-                tags, 
-                variables, 
-                functions, 
-                partials: partials as FSPath, 
-                [__MarkdocPathSymbol]: true, 
+export interface IMarkdocVariableConfig extends IMarkdocConfig {
+    variable(variable: AstroMdocConfig['variables']): Config['variables'];
+}
+
+export interface IMarkdocFuncConfig extends IMarkdocConfig {
+    function(func: AstroMdocConfig['functions']): Config['functions'];
+}
+
+export interface IMarkdocPartialConfig extends IMarkdocConfig {
+    partial(partial: AstroMdocConfig['partials']): Config['partials'];
+    parse(partial: AstroMdocConfig['partials']): Node;
+}
+
+export interface IMarkdocValidationConfig extends IMarkdocConfig{
+    validation(validation: AstroMdocConfig['validation']): Config['validation'];
+}
+
+type AstroMdocConfigFunction = ConfigFunction & {
+    transform?(parameters: Record<string, any>, config: AstroMdocConfig): any;
+    validate?(fn: Func, config: AstroMdocConfig): ValidationError[];
+}
+
+export type AstroMdocConfig = Config & {
+    nodes?: Partial<Record<NodeType, Schema<Config, AstroComponentFactory>>>;
+    tags?: Record<string, Schema<Config, AstroComponentFactory>>;
+    functions?: Record<string, AstroMdocConfigFunction>;
+    partials?: Record<string, URL>;
+}
+
+export type ConfigType = 'node' |
+    'tag' |
+    'function' |
+    /* partials */
+    MarkdocIntegrationOptions |
+    'variable';
+
+export const ConfigFromURL = async (url: URL, configType: ConfigType): Promise<Config> => {
+    let config: Config = {};
+    switch(configType) {
+        case 'node':
+            /* @vite-ignore */
+            const nodeImports = await import(url.pathname);
+            const namedNodeImports = getNamedImport(nodeImports);
+            for(const key of namedNodeImports) {
+                Object.assign(config, MdocConfig({
+                    nodes: {
+                        ...nodeImports[key],
+                    }
+                } satisfies AstroMdocConfig));
+            }
+            break;
+        case 'tag':
+            /* @vite-ignore */
+            const tagImports = await import(url.pathname);
+            const namedTagImports = getNamedImport(tagImports);
+            for(const key of namedTagImports) {
+                Object.assign(config, MdocConfig({
+                    tags: {
+                        ...tagImports[key],
+                    }
+                } satisfies AstroMdocConfig))
+            }
+        case 'function':
+            /* @vite-ignore */
+            const funcImports = await import(url.pathname);
+            const namedFuncImports = getNamedImport(funcImports);
+            for(const key of namedFuncImports) {
+                Object.assign(config, {
+                    functions: {
+                        ...funcImports[key],
+                    },
+                } satisfies Config)
+            }
+        case 'variable':
+            /* @vite-ignore */
+            const varImports = await import(url.pathname);
+            const namedVarImports = getNamedImport(varImports);
+            for(const key of namedVarImports) {
+                Object.assign(config, {
+                    variables: {
+                        ...varImports[key],
+                    }
+                } satisfies Config)
+            }
+        default:
+            const partials = getFilesWithExtentions(url, SUPPORTED_MARKDOC_PARTIALS);
+            const options = configType as MarkdocIntegrationOptions;
+            const tokenizer = new Markdoc.Tokenizer({
+                allowIndentation: !options.ignoreIndentation,
+                typographer: options.typographer,
+            });
+            await Promise.all(partials.map(async partial => {
+                const partialFileName = partial.pathname.split("/");
+                const content = await fs.promises.readFile(partial, 'utf8');
+                const tokens = tokenizer.tokenize(content);
+                const node = Markdoc.parse(tokens);
+
+                Object.assign(config, {
+                    partials: {
+                        [partialFileName[partialFileName.length - 1]]: node,
+                    }
+                } satisfies Config)
+            }));
+    }
+
+    return config;
+}
+
+export const mergeConfig = (configA: Config, configB: Config): Config => {
+    return {
+        nodes: {
+            ...configA.nodes,
+            ...configB.nodes,
+        },
+        tags: {
+            ...configA.tags,
+            ...configB.tags,
+        },
+        functions: {
+            ...configA.functions,
+            ...configB.functions,
+        },
+        partials: {
+            ...configA.partials,
+            ...configB.partials,
+        },
+        variables: {
+            ...configA.variables,
+            ...configB.variables,
+        },
+        validation: {
+            ...configA.validation,
+            ...configB.validation,
+        }
+    } satisfies Config;
+}
+
+const getFilesWithExtentions = (dir: URL, extentions: RegExp) => {
+    let markdocFiles: Array<URL> = [];
+    if(fs.existsSync(dir)) {
+        const files = fs.readdirSync(dir);
+        for(const file of files) {
+            const filepath = new URL(file, dir);
+            if(fs.statSync(filepath).isDirectory()) {
+                markdocFiles = markdocFiles.concat(getFilesWithExtentions(filepath, extentions));
+            } else {
+                if(extentions.test(filepath.href)) {
+                    markdocFiles.push(filepath);
+                }
             }
         }
-        return { 
-            nodes: `/src/markdoc${path.nodes ?? 'nodes'}/index.ts`, 
-            tags: `/src/markdoc${path.tags ?? 'tags'}/index.ts`, 
-            variables: `/src/markdoc${path.variables ?? 'variables'}/index.ts`, 
-            functions: `/src/markdoc${path.functions ?? 'functions'}/index.ts`, 
-            partials: `/src/markdoc${path.partials ?? 'partials'}/`,
-            [__MarkdocPathSymbol]: true,
-        }
-    } else if(path && !isMarkdocPathObj(path))
-        return { 
-            nodes: `${path}/nodes/index.ts` , 
-            tags: `${path}/tags/index.ts`, 
-            variables: `${path}/variables/index.ts`, 
-            functions: `${path}/functions/index.ts`, 
-            partials: `${path}/partials/`,
-            [__MarkdocPathSymbol]: true,
-        }
-    else return { 
-        nodes: `/src/markdoc/nodes/index.ts`, 
-        tags: `/src/markdoc/tags/index.ts`, 
-        variables: `/src/markdoc/variables/index.ts`, 
-        functions: `/src/markdoc/functions/index.ts`, 
-        partials: `/src/markdoc/partials/`, 
-        [__MarkdocPathSymbol]: true,
     }
-}
-
-export const isMarkdocPathObj = (path: any): path is MarkdocPathObj => {
-    return path === 'object' 
-        && path !== null 
-        && __MarkdocPathSymbol in path 
-        && !!(path.__MarkdocPathSymbol) 
-        && path.__MarkdocPathSymbol === true
+    return markdocFiles;
 }

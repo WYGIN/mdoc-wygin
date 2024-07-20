@@ -16,8 +16,8 @@ const { body, config, options } = Astro.props as Props;
 
 const tokenizer = getMarkdocTokenizer(options);
 let tokens = tokenizer.tokenize(body);
-const ast = Markdoc.Ast.fromJSON(tokens as any);
-const content = Markdoc.transform(ast as any, config);
+const ast = Markdoc.parse(tokens);
+const content = Markdoc.transform(ast, config);
 ---
 
 {

@@ -1,7 +1,8 @@
-import type { FSPath } from "./config";
+import type { MdocConfigPath } from "./mdoc";
 
 export interface MarkdocIntegrationOptions {
 	allowHTML?: boolean;
 	ignoreIndentation?: boolean;
-    mdocPath?: FSPath;
+	typographer?: boolean;
+    configPath?: MdocConfigPath;
 }
