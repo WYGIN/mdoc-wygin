@@ -4,5 +4,6 @@ import markdoc from "@astrojs/markdoc";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react(), markdoc()]
+  integrations: [react(), markdoc()],
+  output: 'server',
 });

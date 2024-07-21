@@ -1,7 +1,5 @@
-import type { MarkdocIntegrationOptions } from "./options";
-
 /* FSPath should start with `/` */
-export type FSPath = `/${string}`;
+export type FSPath = `${string}`;
 
 /* PartialPath must point to a directory. i.e. must end with `/` */
 export type PartialPath = `/${string}/`;
@@ -52,7 +50,7 @@ export const defaultMdocPath = ({ path = mdocPathDefault }: { path?: MdocConfigP
     }
 
     let mdocPath: MdocConfig = {};
-    path.path ??= `/src/markdoc`;
+    path.path ??= `src/markdoc`;
     mdocPath.nodes = mdocConfigFile('nodes', path.path);
     mdocPath.tags = mdocConfigFile('tags', path.path);
     mdocPath.variables = mdocConfigFile('variables', path.path);
@@ -66,7 +64,7 @@ export const defaultMdocPath = ({ path = mdocPathDefault }: { path?: MdocConfigP
 export const mdocConfigDefault: Required<MdocConfig> = {
     nodes: mdocConfigFile('nodes'),
     functions: mdocConfigFile('functions'),
-    partials: `/src/markdoc/partials/`,
+    partials: `src/markdoc/partials/`,
     tags: mdocConfigFile('tags'),
     variables: mdocConfigFile('variables'),
     validations: mdocConfigFile('validations'),
@@ -79,8 +77,8 @@ export const mdocPathDefault: MdocConfigPath = {
 
 function mdocConfigFile(filename: string, prefix?: FSPath): FSPath {
     if(prefix) {
-        return `${prefix}/${filename}/index`
+        return `${prefix}/${filename}/index.ts`;
     }
 
-    return `/src/markdoc/${filename}/index`
+    return `src/markdoc/${filename}/index.ts`;
 }

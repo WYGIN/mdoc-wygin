@@ -1,6 +1,6 @@
 ---
 import Render from "astro-mdoc/src/components/Render.astro";
-import { Config, Options, AcfComponents } from 'astro-mdoc/src/modules.js';
+// import { Config, Options, AcfComponents } from 'astro-mdoc/src/modules.js';
 ---
 
 <html lang="en">
@@ -13,9 +13,11 @@ import { Config, Options, AcfComponents } from 'astro-mdoc/src/modules.js';
 	</head>
 	<body>
 		<h1>Astro</h1>
-		<p set:text={JSON.stringify(Config)}></p>
-		<p set:text={JSON.stringify(Options)}></p>
-		<p set:text={JSON.stringify(AcfComponents)}></p>
+		{
+			// <p set:text={JSON.stringify(Config)}></p>
+			// <p set:text={JSON.stringify(Options)}></p>
+			// <p set:text={JSON.stringify(AcfComponents)}></p>
+		}
 		<Render body=`{% AccordionItem heading="Heading" content="content" %}
 		hiiiii hello world
 		{% /AccordionItem %}
