@@ -1,5 +1,1 @@
-import { AccordionI } from './accordion-item.markdoc';
-
-export {
-    AccordionI,
-}
+export { AccordionItem } from './accordion-item.markdoc';

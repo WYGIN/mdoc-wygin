@@ -1,7 +1,7 @@
 import Accordion from "../../components/Accordion.astro";
 import type { AstroMdocConfig } from "astro-mdoc/src/config";
 
-export const Acc = {
+export const AccordionItem = {
     "AccordionItem": {
         render: Accordion as any,
         children: ['paragraph', 'tag', 'list'],
